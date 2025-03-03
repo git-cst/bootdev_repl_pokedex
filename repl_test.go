@@ -4,10 +4,6 @@ import (
 	"testing"
 )
 
-func cleanInput(text string) []string {
-	return []string{}
-}
-
 func TestCleanInput(t *testing.T) {
 	cases := []struct {
 		input    string
