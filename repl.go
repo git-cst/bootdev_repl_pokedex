@@ -7,9 +7,15 @@ import (
 	"strings"
 )
 
+type Config struct {
+	nextUrl     string
+	previousUrl string
+}
+
 func startRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := createCommands()
+	config := Config{}
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -29,7 +35,7 @@ func startRepl() {
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
-			callbackError := command.callback()
+			callbackError := command.callback(&config)
 
 			if callbackError != nil {
 				fmt.Println(callbackError)
