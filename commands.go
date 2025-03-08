@@ -75,6 +75,9 @@ func commandMap(c *Config) error {
 		return err
 	}
 
+	c.nextUrl = locations.Next
+	c.previousUrl = locations.Previous
+
 	for i := range locations.Results {
 		fmt.Printf("%v\n", locations.Results[i].Name)
 	}
@@ -86,6 +89,7 @@ func commandMapb(c *Config) error {
 	var endpoint string
 	if len(c.previousUrl) == 0 {
 		fmt.Println("you're on the first page")
+		return nil
 	} else {
 		endpoint = c.previousUrl
 	}
@@ -96,8 +100,11 @@ func commandMapb(c *Config) error {
 		return err
 	}
 
+	c.nextUrl = locations.Next
+	c.previousUrl = locations.Previous
+
 	for i, _ := range locations.Results {
-		fmt.Printf("%v", locations.Results[i].Name)
+		fmt.Printf("%v\n", locations.Results[i].Name)
 	}
 
 	return nil

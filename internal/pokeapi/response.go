@@ -8,16 +8,16 @@ import (
 )
 
 type LocationRequest struct {
-	Count    int `json:"count"`
-	Next     any `json:"next"`
-	Previous any `json:"previous"`
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
 	Results  []struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"results"`
 }
 
-func getLocation(url string) (LocationRequest, error) {
+func GetLocation(url string) (LocationRequest, error) {
 	res, err := http.Get(url)
 	if err != nil {
 		return LocationRequest{}, err
