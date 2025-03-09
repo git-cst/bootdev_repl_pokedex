@@ -16,14 +16,14 @@ type Cache struct {
 	Mutex    sync.Mutex
 }
 
-func NewCache(key string, value []byte) *Cache {
+func NewCache() *Cache {
 	newCache := &Cache{
 		Entries:  make(map[string]CacheEntry),
-		Interval: time.Duration(5 * time.Second),
+		Interval: time.Duration(10 * time.Second),
 		Mutex:    sync.Mutex{},
 	}
 
-	newCache.reap()
+	go newCache.reap()
 
 	return newCache
 }

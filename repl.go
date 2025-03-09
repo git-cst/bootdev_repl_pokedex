@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/git-cst/bootdev_pokedex/internal/pokecache"
 )
 
 type Config struct {
@@ -16,6 +18,7 @@ func startRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := createCommands()
 	config := Config{}
+	cache := pokecache.NewCache()
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -35,7 +38,7 @@ func startRepl() {
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
-			callbackError := command.callback(&config)
+			callbackError := command.callback(&config, cache)
 
 			if callbackError != nil {
 				fmt.Println(callbackError)

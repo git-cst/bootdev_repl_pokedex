@@ -1,16 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/git-cst/bootdev_pokedex/internal/pokeapi"
+	"github.com/git-cst/bootdev_pokedex/internal/pokecache"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*Config) error
+	callback    func(*Config, *pokecache.Cache) error
 }
 
 func createCommands() map[string]cliCommand {
@@ -43,13 +45,13 @@ func createCommands() map[string]cliCommand {
 	return commands
 }
 
-func commandExit(c *Config) error {
+func commandExit(c *Config, ca *pokecache.Cache) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return fmt.Errorf("Pokedex did not exit as expected")
 }
 
-func commandHelp(c *Config) error {
+func commandHelp(c *Config, ca *pokecache.Cache) error {
 	helpMessage := "Welcome to the Pokedex!\nUsage:\n\n"
 	commands := createCommands()
 
@@ -61,7 +63,7 @@ func commandHelp(c *Config) error {
 	return nil
 }
 
-func commandMap(c *Config) error {
+func commandMap(c *Config, ca *pokecache.Cache) error {
 	var endpoint string
 	if len(c.nextUrl) == 0 {
 		endpoint = "https://pokeapi.co/api/v2/location-area"
@@ -69,23 +71,43 @@ func commandMap(c *Config) error {
 		endpoint = c.nextUrl
 	}
 
+	// Check if the key exists in the cache
+	value, exists := ca.Get(endpoint)
+
+	// If key exists in the cache unmarshal the bytes, print the locations, return
+	if exists {
+		locations := pokeapi.LocationRequest{}
+		err := json.Unmarshal(value, &locations)
+
+		if err != nil {
+			return err
+		}
+
+		locationHandler(c, &locations)
+
+		return nil
+	}
+
+	// Key does not exist in the cache therefore get locations, print the locations and add to cache
 	locations, err := pokeapi.GetLocation(endpoint)
 
 	if err != nil {
 		return err
 	}
 
-	c.nextUrl = locations.Next
-	c.previousUrl = locations.Previous
+	locationHandler(c, &locations)
 
-	for i := range locations.Results {
-		fmt.Printf("%v\n", locations.Results[i].Name)
+	cacheBytes, err := json.Marshal(locations)
+
+	if err != nil {
+		return err
 	}
 
+	ca.Add(endpoint, cacheBytes)
 	return nil
 }
 
-func commandMapb(c *Config) error {
+func commandMapb(c *Config, ca *pokecache.Cache) error {
 	var endpoint string
 	if len(c.previousUrl) == 0 {
 		fmt.Println("you're on the first page")
@@ -94,18 +116,46 @@ func commandMapb(c *Config) error {
 		endpoint = c.previousUrl
 	}
 
+	// Check if the key exists in the cache
+	value, exists := ca.Get(endpoint)
+
+	// If key exists in the cache unmarshal the bytes, print the locations, return
+	if exists {
+		locations := pokeapi.LocationRequest{}
+		err := json.Unmarshal(value, &locations)
+
+		if err != nil {
+			return err
+		}
+
+		locationHandler(c, &locations)
+		return nil
+	}
+
+	// Key does not exist in the cache therefore get locations, print the locations and add to cache
 	locations, err := pokeapi.GetLocation(endpoint)
 
 	if err != nil {
 		return err
 	}
 
-	c.nextUrl = locations.Next
-	c.previousUrl = locations.Previous
+	locationHandler(c, &locations)
 
-	for i, _ := range locations.Results {
-		fmt.Printf("%v\n", locations.Results[i].Name)
+	cacheBytes, err := json.Marshal(locations)
+
+	if err != nil {
+		return err
 	}
 
+	ca.Add(endpoint, cacheBytes)
 	return nil
+}
+
+func locationHandler(c *Config, l *pokeapi.LocationRequest) {
+	for i := range l.Results {
+		fmt.Printf("%v\n", l.Results[i].Name)
+	}
+
+	c.nextUrl = l.Next
+	c.previousUrl = l.Previous
 }
