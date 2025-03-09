@@ -71,51 +71,19 @@ func commandMap(c *Config, ca *pokecache.Cache) error {
 		endpoint = c.nextUrl
 	}
 
-	// Check if the key exists in the cache
-	value, exists := ca.Get(endpoint)
-
-	// If key exists in the cache unmarshal the bytes, print the locations, return
-	if exists {
-		locations := pokeapi.LocationRequest{}
-		err := json.Unmarshal(value, &locations)
-
-		if err != nil {
-			return err
-		}
-
-		locationHandler(c, &locations)
-
-		return nil
-	}
-
-	// Key does not exist in the cache therefore get locations, print the locations and add to cache
-	locations, err := pokeapi.GetLocation(endpoint)
-
-	if err != nil {
-		return err
-	}
-
-	locationHandler(c, &locations)
-
-	cacheBytes, err := json.Marshal(locations)
-
-	if err != nil {
-		return err
-	}
-
-	ca.Add(endpoint, cacheBytes)
-	return nil
+	return fetchLocation(c, ca, endpoint)
 }
 
 func commandMapb(c *Config, ca *pokecache.Cache) error {
-	var endpoint string
 	if len(c.previousUrl) == 0 {
 		fmt.Println("you're on the first page")
 		return nil
-	} else {
-		endpoint = c.previousUrl
 	}
 
+	return fetchLocation(c, ca, c.previousUrl)
+}
+
+func fetchLocation(c *Config, ca *pokecache.Cache, endpoint string) error {
 	// Check if the key exists in the cache
 	value, exists := ca.Get(endpoint)
 
@@ -129,6 +97,7 @@ func commandMapb(c *Config, ca *pokecache.Cache) error {
 		}
 
 		locationHandler(c, &locations)
+
 		return nil
 	}
 
