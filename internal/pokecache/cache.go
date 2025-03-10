@@ -23,7 +23,7 @@ func NewCache() *Cache {
 		Mutex:    sync.Mutex{},
 	}
 
-	go newCache.reap()
+	newCache.StartReapLoop()
 
 	return newCache
 }
@@ -50,18 +50,24 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 	return entry.Val, true
 }
 
-func (c *Cache) reap() {
+func (c *Cache) StartReapLoop() {
 	ticker := time.NewTicker(c.Interval)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		c.Mutex.Lock()
-		now := time.Now()
-		for key, entry := range c.Entries {
-			if now.Sub(entry.CreatedAt) > c.Interval {
-				delete(c.Entries, key)
-			}
+	go func() {
+		defer ticker.Stop()
+		for range ticker.C {
+			c.Reap()
 		}
-		c.Mutex.Unlock()
+	}()
+}
+
+func (c *Cache) Reap() {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	now := time.Now()
+	for key, entry := range c.Entries {
+		if now.Sub(entry.CreatedAt) > c.Interval {
+			delete(c.Entries, key)
+		}
 	}
 }
