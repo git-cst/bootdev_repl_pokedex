@@ -7,6 +7,25 @@ import (
 	"net/http"
 )
 
+func performGetRequest(url string) ([]byte, error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode > 299 {
+		return []byte{}, fmt.Errorf("status code: %d, response text: %s", res.StatusCode, res.Body)
+	}
+
+	bodyBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return bodyBytes, nil
+}
+
 type LocationRequest struct {
 	Count    int    `json:"count"`
 	Next     string `json:"next"`
@@ -18,17 +37,7 @@ type LocationRequest struct {
 }
 
 func GetLocation(url string) (LocationRequest, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return LocationRequest{}, err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode > 299 {
-		return LocationRequest{}, fmt.Errorf("status code: %d, response text: %s", res.StatusCode, res.Body)
-	}
-
-	bodyBytes, err := io.ReadAll(res.Body)
+	bodyBytes, err := performGetRequest(url)
 	if err != nil {
 		return LocationRequest{}, err
 	}
@@ -40,4 +49,29 @@ func GetLocation(url string) (LocationRequest, error) {
 	}
 
 	return locations, nil
+}
+
+type ExploreRequest struct {
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
+	Results  []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"results"`
+}
+
+func ExploreLocation(url string) (ExploreRequest, error) {
+	bodyBytes, err := performGetRequest(url)
+	if err != nil {
+		return ExploreRequest{}, err
+	}
+
+	locationInfo := ExploreRequest{}
+	err = json.Unmarshal(bodyBytes, &locationInfo)
+	if err != nil {
+		return ExploreRequest{}, err
+	}
+
+	return locationInfo, nil
 }

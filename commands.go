@@ -12,7 +12,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*Config, *pokecache.Cache) error
+	callback    func(*Config, *pokecache.Cache, ...any) error
 }
 
 func createCommands() map[string]cliCommand {
@@ -42,16 +42,22 @@ func createCommands() map[string]cliCommand {
 		callback:    commandMapb,
 	}
 
+	commands["explore"] = cliCommand{
+		name:        "explore",
+		description: "Displays the pokémon available at the provided location",
+		callback:    commandExplore,
+	}
+
 	return commands
 }
 
-func commandExit(c *Config, ca *pokecache.Cache) error {
+func commandExit(c *Config, ca *pokecache.Cache, args ...any) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return fmt.Errorf("Pokedex did not exit as expected")
 }
 
-func commandHelp(c *Config, ca *pokecache.Cache) error {
+func commandHelp(c *Config, ca *pokecache.Cache, args ...any) error {
 	helpMessage := "Welcome to the Pokedex!\nUsage:\n\n"
 	commands := createCommands()
 
@@ -63,7 +69,20 @@ func commandHelp(c *Config, ca *pokecache.Cache) error {
 	return nil
 }
 
-func commandMap(c *Config, ca *pokecache.Cache) error {
+func commandExplore(c *Config, ca *pokecache.Cache, args ...any) error {
+	if len(args) == 0 {
+		return fmt.Errorf("input location (%s) was of length 0", args)
+	}
+
+	location, ok := args[0].(string)
+	if !ok {
+		return fmt.Errorf("args %v provided was not of the expected type string", location)
+	}
+
+	return nil
+}
+
+func commandMap(c *Config, ca *pokecache.Cache, args ...any) error {
 	var endpoint string
 	if len(c.nextUrl) == 0 {
 		endpoint = "https://pokeapi.co/api/v2/location-area"
@@ -74,7 +93,7 @@ func commandMap(c *Config, ca *pokecache.Cache) error {
 	return fetchLocation(c, ca, endpoint)
 }
 
-func commandMapb(c *Config, ca *pokecache.Cache) error {
+func commandMapb(c *Config, ca *pokecache.Cache, args ...any) error {
 	if len(c.previousUrl) == 0 {
 		fmt.Println("you're on the first page")
 		return nil
