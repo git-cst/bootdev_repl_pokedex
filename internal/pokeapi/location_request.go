@@ -12,8 +12,8 @@ type LocationRequest struct {
 	} `json:"results"`
 }
 
-func GetLocation(url string) (LocationRequest, error) {
-	bodyBytes, err := PerformGetRequest(url)
+func GetLocation(URL string) (LocationRequest, error) {
+	bodyBytes, err := PerformGetRequest(URL)
 	if err != nil {
 		return LocationRequest{}, err
 	}

@@ -6,15 +6,15 @@ import (
 	"net/http"
 )
 
-func PerformGetRequest(url string) ([]byte, error) {
-	res, err := http.Get(url)
+func PerformGetRequest(URL string) ([]byte, error) {
+	res, err := http.Get(URL)
 	if err != nil {
 		return []byte{}, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode > 299 {
-		return []byte{}, fmt.Errorf("status code: %d, response text: %s", res.StatusCode, res.Body)
+		return []byte{}, fmt.Errorf("status code: %d\n, response text: %s", res.StatusCode, res.Body)
 	}
 
 	bodyBytes, err := io.ReadAll(res.Body)

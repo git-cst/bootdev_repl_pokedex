@@ -31,11 +31,18 @@ func startRepl() {
 
 		cleanUserInput := cleanInput(userInput)
 
+		var arg any
+		if len(cleanUserInput) > 1 {
+			arg = cleanUserInput[1]
+		} else {
+			arg = nil
+		}
+
 		command, ok := commands[cleanUserInput[0]]
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
-			callbackError := command.Callback(&config, cache)
+			callbackError := command.Callback(&config, cache, arg)
 
 			if callbackError != nil {
 				fmt.Println(callbackError)

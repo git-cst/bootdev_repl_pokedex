@@ -44,5 +44,11 @@ func CreateCommands() map[string]cliCommand {
 		Callback:    commandExplore,
 	}
 
+	commands["catch"] = cliCommand{
+		name:        "catch",
+		description: "Attempts to catch the pokemon provided as an argument",
+		Callback:    commandCatch,
+	}
+
 	return commands
 }

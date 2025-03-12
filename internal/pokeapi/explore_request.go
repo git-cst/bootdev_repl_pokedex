@@ -1,6 +1,8 @@
 package pokeapi
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type PokemonAttributes struct {
 	MinLevel int `json:"min_level"`
@@ -20,8 +22,8 @@ type ExploreRequest struct {
 	Pokemon      map[string]Pokemon `json:"pokemon"`
 }
 
-func ExploreLocation(url string) (ExploreRequest, error) {
-	bodyBytes, err := PerformGetRequest(url)
+func ExploreLocation(URL string) (ExploreRequest, error) {
+	bodyBytes, err := PerformGetRequest(URL)
 	if err != nil {
 		return ExploreRequest{}, err
 	}
@@ -90,11 +92,5 @@ func ExploreLocation(url string) (ExploreRequest, error) {
 		result.Pokemon[pokemon.Name] = pokemon
 	}
 
-	locationInfo := ExploreRequest{}
-	err = json.Unmarshal(bodyBytes, &locationInfo)
-	if err != nil {
-		return ExploreRequest{}, err
-	}
-
-	return locationInfo, nil
+	return result, nil
 }
