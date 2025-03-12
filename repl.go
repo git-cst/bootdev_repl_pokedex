@@ -6,18 +6,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/git-cst/bootdev_pokedex/commands"
+	"github.com/git-cst/bootdev_pokedex/internal/config"
 	"github.com/git-cst/bootdev_pokedex/internal/pokecache"
 )
 
-type Config struct {
-	nextUrl     string
-	previousUrl string
-}
-
 func startRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
-	commands := createCommands()
-	config := Config{}
+	commands := commands.CreateCommands()
+	config := config.Config{}
 	cache := pokecache.NewCache()
 
 	for {
@@ -38,7 +35,7 @@ func startRepl() {
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
-			callbackError := command.callback(&config, cache)
+			callbackError := command.Callback(&config, cache)
 
 			if callbackError != nil {
 				fmt.Println(callbackError)
