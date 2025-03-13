@@ -56,7 +56,7 @@ func commandExplore(c *config.Config, ca *pokecache.Cache, args ...any) error {
 
 func exploreHandler(er *pokeapi.ExploreRequest) {
 	fmt.Println("Found Pokémon:")
-	for pokemon := range er.Pokemon {
+	for pokemon := range er.AvailablePokemon {
 		fmt.Printf(" - %s\n", pokemon)
 	}
 }

@@ -4,22 +4,22 @@ import (
 	"encoding/json"
 )
 
-type PokemonAttributes struct {
+type VersionLevelDistribution struct {
 	MinLevel int `json:"min_level"`
 	MaxLevel int `json:"max_level"`
 	Chance   int `json:"chance"`
 }
 
-type Pokemon struct {
-	Name              string                       `json:"name"`
-	URL               string                       `json:"url"`
-	VersionAttributes map[string]PokemonAttributes `json:"attributes"`
+type AvailablePokemon struct {
+	Name              string                              `json:"name"`
+	URL               string                              `json:"url"`
+	VersionAttributes map[string]VersionLevelDistribution `json:"attributes"`
 }
 
 type ExploreRequest struct {
-	LocationName string             `json:"name"`
-	LocationURL  string             `json:"url"`
-	Pokemon      map[string]Pokemon `json:"pokemon"`
+	LocationName     string                      `json:"name"`
+	LocationURL      string                      `json:"url"`
+	AvailablePokemon map[string]AvailablePokemon `json:"pokemon"`
 }
 
 func ExploreLocation(URL string) (ExploreRequest, error) {
@@ -62,17 +62,17 @@ func ExploreLocation(URL string) (ExploreRequest, error) {
 
 	// Create the struct to return to the command
 	result := ExploreRequest{
-		LocationName: rawData.Location.Name,
-		LocationURL:  rawData.Location.URL,
-		Pokemon:      make(map[string]Pokemon),
+		LocationName:     rawData.Location.Name,
+		LocationURL:      rawData.Location.URL,
+		AvailablePokemon: make(map[string]AvailablePokemon),
 	}
 
 	// Process each encounter creating the pokemon
 	for _, encounter := range rawData.PokemonEncounters {
-		pokemon := Pokemon{
+		pokemon := AvailablePokemon{
 			Name:              encounter.Pokemon.Name,
 			URL:               encounter.Pokemon.URL,
-			VersionAttributes: make(map[string]PokemonAttributes),
+			VersionAttributes: make(map[string]VersionLevelDistribution),
 		}
 
 		// Process each version's details
@@ -81,7 +81,7 @@ func ExploreLocation(URL string) (ExploreRequest, error) {
 
 			if len(versionDetail.EncounterDetails) > 0 {
 				detail := versionDetail.EncounterDetails[0]
-				pokemon.VersionAttributes[versionName] = PokemonAttributes{
+				pokemon.VersionAttributes[versionName] = VersionLevelDistribution{
 					MinLevel: detail.MinLevel,
 					MaxLevel: detail.MaxLevel,
 					Chance:   detail.Chance,
@@ -89,7 +89,7 @@ func ExploreLocation(URL string) (ExploreRequest, error) {
 			}
 		}
 
-		result.Pokemon[pokemon.Name] = pokemon
+		result.AvailablePokemon[pokemon.Name] = pokemon
 	}
 
 	return result, nil
