@@ -6,10 +6,9 @@ import (
 
 	"github.com/git-cst/bootdev_pokedex/internal/config"
 	"github.com/git-cst/bootdev_pokedex/internal/pokeapi"
-	"github.com/git-cst/bootdev_pokedex/internal/pokecache"
 )
 
-func commandMap(c *config.Config, ca *pokecache.Cache, args ...any) error {
+func commandMap(c *config.Config, args ...any) error {
 	var endpoint string
 	if len(c.NextUrl) == 0 {
 		endpoint = "https://pokeapi.co/api/v2/location-area"
@@ -17,21 +16,21 @@ func commandMap(c *config.Config, ca *pokecache.Cache, args ...any) error {
 		endpoint = c.NextUrl
 	}
 
-	return fetchLocation(c, ca, endpoint)
+	return fetchLocation(c, endpoint)
 }
 
-func commandMapb(c *config.Config, ca *pokecache.Cache, args ...any) error {
+func commandMapb(c *config.Config, args ...any) error {
 	if len(c.PreviousUrl) == 0 {
 		fmt.Println("you're on the first page")
 		return nil
 	}
 
-	return fetchLocation(c, ca, c.PreviousUrl)
+	return fetchLocation(c, c.PreviousUrl)
 }
 
-func fetchLocation(c *config.Config, ca *pokecache.Cache, endpoint string) error {
+func fetchLocation(c *config.Config, endpoint string) error {
 	// Check if the key exists in the cache
-	value, exists := ca.Get(endpoint)
+	value, exists := c.Cache.Get(endpoint)
 
 	// If key exists in the cache unmarshal the bytes, print the locations, return
 	if exists {
@@ -62,7 +61,7 @@ func fetchLocation(c *config.Config, ca *pokecache.Cache, endpoint string) error
 		return err
 	}
 
-	ca.Add(endpoint, cacheBytes)
+	c.Cache.Add(endpoint, cacheBytes)
 	return nil
 }
 

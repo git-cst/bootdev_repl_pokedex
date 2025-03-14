@@ -8,6 +8,8 @@ type Pokemon struct {
 	Stats          map[string]StatValues `json:"stats"`
 	Types          []string              `json:"type"`
 	BaseExperience int                   `json:"base_experience"`
+	Height         int                   `json:"height"`
+	Weight         int                   `json:"weight"`
 }
 
 type StatValues struct {
@@ -24,9 +26,10 @@ func PokemonRequest(URL string) (Pokemon, error) {
 
 	// Create the raw data structure
 	var rawData struct {
+		ID                     int    `json:"id"`
 		BaseExperience         int    `json:"base_experience"`
 		Height                 int    `json:"height"`
-		ID                     int    `json:"id"`
+		Weight                 int    `json:"weight"`
 		IsDefault              bool   `json:"is_default"`
 		LocationAreaEncounters string `json:"location_area_encounters"`
 		Name                   string `json:"name"`
@@ -66,6 +69,8 @@ func PokemonRequest(URL string) (Pokemon, error) {
 		Stats:          make(map[string]StatValues),
 		Types:          []string{},
 		BaseExperience: rawData.BaseExperience,
+		Height:         rawData.Height,
+		Weight:         rawData.Weight,
 	}
 
 	// Process each stat adding to the stats map

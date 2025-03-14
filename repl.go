@@ -8,14 +8,22 @@ import (
 
 	"github.com/git-cst/bootdev_pokedex/commands"
 	"github.com/git-cst/bootdev_pokedex/internal/config"
+	"github.com/git-cst/bootdev_pokedex/internal/pokeapi"
 	"github.com/git-cst/bootdev_pokedex/internal/pokecache"
+	"github.com/git-cst/bootdev_pokedex/internal/pokedex"
 )
 
 func startRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := commands.CreateCommands()
-	config := config.Config{}
+	userPokedex := pokedex.Pokedex{
+		CaughtPokemon: make(map[string]pokeapi.Pokemon),
+	}
 	cache := pokecache.NewCache()
+	config := config.Config{
+		Pokedex: userPokedex,
+		Cache:   cache,
+	}
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -42,7 +50,7 @@ func startRepl() {
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
-			callbackError := command.Callback(&config, cache, arg)
+			callbackError := command.Callback(&config, arg)
 
 			if callbackError != nil {
 				fmt.Println(callbackError)

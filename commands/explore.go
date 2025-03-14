@@ -6,10 +6,9 @@ import (
 
 	"github.com/git-cst/bootdev_pokedex/internal/config"
 	"github.com/git-cst/bootdev_pokedex/internal/pokeapi"
-	"github.com/git-cst/bootdev_pokedex/internal/pokecache"
 )
 
-func commandExplore(c *config.Config, ca *pokecache.Cache, args ...any) error {
+func commandExplore(c *config.Config, args ...any) error {
 	if len(args) == 0 {
 		return fmt.Errorf("input location (%s) was of length 0", args)
 	}
@@ -23,7 +22,7 @@ func commandExplore(c *config.Config, ca *pokecache.Cache, args ...any) error {
 	endpoint := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s", location)
 
 	// Check if the key exists in the cache
-	value, exists := ca.Get(endpoint)
+	value, exists := c.Cache.Get(endpoint)
 	// If key exists in the cache unmarshal the bytes, print the pokemon, return
 	if exists {
 		exploration := pokeapi.ExploreRequest{}
@@ -50,7 +49,7 @@ func commandExplore(c *config.Config, ca *pokecache.Cache, args ...any) error {
 		return err
 	}
 
-	ca.Add(endpoint, cacheBytes)
+	c.Cache.Add(endpoint, cacheBytes)
 	return nil
 }
 

@@ -2,13 +2,12 @@ package commands
 
 import (
 	"github.com/git-cst/bootdev_pokedex/internal/config"
-	"github.com/git-cst/bootdev_pokedex/internal/pokecache"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	Callback    func(*config.Config, *pokecache.Cache, ...any) error
+	Callback    func(*config.Config, ...any) error
 }
 
 func CreateCommands() map[string]cliCommand {
@@ -48,6 +47,18 @@ func CreateCommands() map[string]cliCommand {
 		name:        "catch",
 		description: "Attempts to catch the pokemon provided as an argument",
 		Callback:    commandCatch,
+	}
+
+	commands["inspect"] = cliCommand{
+		name:        "inspect",
+		description: "Shows the information about a pokemon you've already caught",
+		Callback:    commandInspect,
+	}
+
+	commands["pokedex"] = cliCommand{
+		name:        "pokedex",
+		description: "Displays all pokemon that you have caught so far",
+		Callback:    commandPokedex,
 	}
 
 	return commands
